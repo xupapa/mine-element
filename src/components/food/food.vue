@@ -38,14 +38,13 @@
         	</ratingselect>
         	<div class="rating-wrapper">
         		<ul v-show="food.ratings && food.ratings.length">
-        			<li v-for="rating in food.ratings" class="rating-item">
+        			<li v-show="needShow(rating.rateType,rating.text)" v-for="rating in food.ratings" class="rating-item">
         				<div class="user">
         					<span class="name">{{rating.username}}</span>
         					<img :src="rating.avatar" class="avatar" width="12" height="12">
         				</div>
         				<div class="time">
-        					{{rating.ratetime}}
-        					time
+        					{{rating.rateTime|formatDate}}
         				</div>
         				<p class="text">
         					<span :class="{'icon-thumb_up':rating.rateType === 0,'icon-thumb_down':rating.rateType === 1}"></span>{{rating.text}}
@@ -66,10 +65,9 @@
 import BScroll from "better-scroll";
 import cartcontrol from '@/components/cartcontrol/cartcontrol';
 import split from '@/components/split/split';
-import ratingselect from '@/components/ratingselect/ratingselect'
+import ratingselect from '@/components/ratingselect/ratingselect';
 import Vue from 'vue';
-const POSITIVE = 0;
-const NEGATIVE = 1;
+import {formatDate} from '@/common/js/date';
 const ALL = 2;
 export default {
 	name:'food',
@@ -110,13 +108,15 @@ export default {
 			this.showFlag = true
 			this.selectType = ALL
 			this.onlyContent = true 
-			if (!this.scroll) {
-				this.$nextTick(() => {
-					this._initBScroll()
-				})
-			} else {
-				this.scroll.refresh()
-			}
+			this.$nextTick(() => {
+				if (!this.scroll) {
+					this.scroll = new BScroll(this.$refs.food, {
+					click: true
+					})
+				} else {
+					this.scroll.refresh();
+				}
+			})
 		},
 		hide() {
 			this.showFlag = false
@@ -132,17 +132,34 @@ export default {
         	this.$nextTick(() => {
         		this.scroll.refresh()
         	})
-        }
+        },
+        //给v-show绑定函数 通过返回值巧妙的过滤要显示的内容 通过this.selectType(tab选择的值ALL 、POSITIVE和NEGATIVE) 和 type(rateType)的值作比较 相等则显示 否则不显示 读取rating.text并和onlyContent比较来达到 显示/隐藏 无内容评论
+        needShow(type, text) {
+	        if (this.onlyContent && !text) {
+	          return false;
+	        }
+	        if (this.selectType === ALL) {
+	          return true;
+	        } else {
+	          return type === this.selectType;
+	        }
+        },
 	},
 	components: {
 		cartcontrol,
 		split,
 		ratingselect
+	},
+	filters: {
+		formatDate(time) {
+			let date = new Date(time)
+			return formatDate(date, "yyyy-MM-dd hh:mm")
+		}
 	}
 }
 </script>
 <style lang="stylus" type="stylesheet/stylus">
-@import "../../common/stylus/mixin.styl"
+@import "../../common/stylus/mixin.styl";
 	.food 
 		position fixed
 		top 0
@@ -282,5 +299,10 @@ export default {
 								color rgb(0, 160, 220)
 							&.icon-thumb_down	
 								color: rgb(147, 153, 159)
+				.no-rating
+					padding 16px 0
+					font-size 12px
+					color rgb(147, 153, 159)
+								
 								
 </style>	
