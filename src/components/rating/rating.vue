@@ -56,6 +56,7 @@ import BScroll from 'better-scroll'
 import star from '@/components/star/star'
 import split from '@/components/split/split'
 import ratingselect from '@/components/ratingselect/ratingselect'
+import {formatDate} from '@/common/js/date'
 const ALL = 2
 const ERR_OK = 0
 export default{
@@ -119,10 +120,17 @@ export default{
 	          return type === this.selectType;
 	        }
 		}
+	},
+	filters: {
+		formatDate(time) {
+			let date = new Date(time)
+			return formatDate(date, "yyyy-MM-dd hh:mm")
+		}
 	}
 }
 </script>
 <style lang="stylus" type="stylesheet/stylus">
+@import "../../common/stylus/mixin.styl"
 	.ratings
 		position absolute
 		top 183px
@@ -205,6 +213,9 @@ export default{
 			.rating-item
 				display flex
 				padding-top 18px
+				border-1px(rgba(7, 17, 27, 0.1))
+				padding-top 18px
+				padding-bottom 10px 
 				.avatar
 					flex 0 0 28px
 					margin-right 12px
