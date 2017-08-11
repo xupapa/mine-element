@@ -8,9 +8,9 @@
 					<span class="ratingCount">({{seller.ratingCount}})</span>
 					<span class="sellCount">月售{{seller.sellCount}}单</span>
 				</div>
-				<div class="heart">
-					<span class="icon-favorite"></span>
-					<p class="text">已收藏</p>
+				<div class="heart" @click="toggle">
+					<span :class="this.favorite ? 'icon-favorite' : ['icon-favorite-no','icon-favorite']"></span>
+					<p class="text" :class="this.favorite ? '' :'icon-favorite-no-text' ">{{text}}</p>
 				</div>
 				<div class="content">
 					<span class="delivery">
@@ -36,13 +36,20 @@
 				</ul>
 			</div>
 			<split></split>
-			<div class="seller-pic">
+			<div class="seller-pic" >
 				<h1 class="title">商家实景</h1>
-				<div class="pic">
-					<ul class="picList">
-						<li class="item" v-for="item in seller.pics"><img :src="item.pics" width="120" height="94"></li>
+				<div class="pic" ref="pics">
+					<ul class="picList" ref="picList">
+						<li class="item" v-for="item in seller.pics"><img :src="item" width="120" height="94"></li>
 					</ul>
 				</div>
+			</div>
+			<split></split>
+			<div class="info">
+				<h1 class="title">商家信息</h1>
+				<ul class="list">
+					<li v-for="info in seller.infos" class="list-item">{{info}}</li>
+				</ul>
 			</div>
 		</div>
 	</div>
@@ -54,7 +61,7 @@ import BScroll from 'better-scroll'
 export default{
 	data() {
 		return{
-
+			favorite: false
 		}
 	},
 	props: {
@@ -72,9 +79,13 @@ export default{
 	mounted() {
 		this.$nextTick(() => {
 			this._initScroll()
+			this._initPics()
 		})
 	},
 	methods: {
+		toggle() {
+			this.favorite = !this.favorite
+		},
 		_initScroll() {
 			if (!this.scroll) {
 	          this.scroll = new BScroll(this.$refs.seller, {
@@ -83,15 +94,36 @@ export default{
 	        } else {
 	          this.scroll.refresh();
 	        }
+		},
+		_initPics() {
+			if (this.seller.pics) {
+				let picWidth = 120
+				let margin = 6
+				let width = (picWidth + margin) * this.seller.pics.length - margin
+				this.$refs.picList.style.width = width + 'px'
+				if (!this.picScroll) {
+						this.$nextTick(() => {
+							this.picScroll = new BScroll(this.$refs.pics,{
+							scrollX: true,
+							eventPassthrough: 'vertical'
+						})
+					})
+				}
+			} 
 		}
 	},
 	watch: {
       'seller' () {
         this.$nextTick(() => {
-          this._initScroll();
-          // this._initPics();
+          this._initScroll()
+          this._initPics()
         });
       }
+    },
+    computed: {
+    	text() {
+    		return this.favorite ? '已收藏' : '未收藏'
+    	}
     }
 }
 </script>
@@ -136,11 +168,18 @@ export default{
 					font-size 24px
 					color rgb(240, 20, 20)
 					line-height 24px
+				.icon-favorite-no
+					color rgb(212, 214, 217)	
 				.text
 					font-size 10px
 					color rgb(77, 85, 93)
 					line-height 10px
-					margin-top 4px	
+					margin-top 4px
+				.icon-favorite-no-text
+					font-size 10px
+					color rgb(212, 214, 217)
+					line-height 10px
+					margin-top 4px		
 			.content
 				display flex
 				padding 18px 0
@@ -165,7 +204,7 @@ export default{
 							color rgb(147, 153, 159)
 							line-height 10px	
 		.activity
-			padding 18px 18px 16px
+			padding: 18px 18px 0 18px
 			.title
 				font-size 14px
 				color rgb(7, 17, 27)
@@ -209,6 +248,9 @@ export default{
 						margin-left 6px						
 		.seller-pic				
 			padding 18px
+			width 100%
+			white-space nowrap
+			overflow hidden
 			.title 
 				font-size 14px
 				color rgb(7, 17, 27)
@@ -216,10 +258,27 @@ export default{
 				margin-bottom 12px
 			.pic 
 				.picList
+					font-size 0
 					.item
 						display inline-block
 						margin-right 6px
-						white-space nowrap
 						&.last-child
 							margin-right 0	
+		.info
+			padding: 18px 18px 0 18px
+			.title					
+				font-size 14px
+				color rgb(7, 17, 27)
+				line-height 14px
+				padding-bottom 12px
+			.list 
+				.list-item 
+					padding 16px 12px
+					font-size 12px
+					color rgb(7, 17, 27)
+					line-height 16px
+					font-weight 200
+					border-top solid 1px rgba(7, 17, 27, 0.1)
+						
+				
 </style>
