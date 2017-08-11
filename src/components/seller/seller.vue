@@ -1,38 +1,62 @@
 <template>
-	<div class="seller">
-		<div class="overview">
-			<div class="head">
-				<h1 class="title">{{seller.name}}</h1>
-				<star :size="36" :score="seller.score"></star>
-				<span class="ratingCount">({{seller.ratingCount}})</span>
-				<span class="sellCount">月售{{seller.sellCount}}单</span>
+	<div class="seller" ref="seller">
+		<div class="seller-content">
+			<div class="overview">
+				<div class="head">
+					<h1 class="title">{{seller.name}}</h1>
+					<star :size="36" :score="seller.score"></star>
+					<span class="ratingCount">({{seller.ratingCount}})</span>
+					<span class="sellCount">月售{{seller.sellCount}}单</span>
+				</div>
+				<div class="heart">
+					<span class="icon-favorite"></span>
+					<p class="text">已收藏</p>
+				</div>
+				<div class="content">
+					<span class="delivery">
+						<h2 class="title">起送价</h2>
+						<span class="text">20<span class="unit">元</span></span>
+					</span>
+					<span class="price">
+						<h2 class="title">商家配送</h2>
+						<span class="text">4<span class="unit">元</span></span>
+					</span>
+					<span class="time">
+						<h2 class="title">平均配送</h2>
+						<span class="text">39<span class="unit">分钟</span></span>
+					</span>
+				</div>
 			</div>
-			<div class="heart">
-				<span class="icon-favorite"></span>
-				<p class="text">已收藏</p>
+			<split></split>
+			<div class="activity">
+				<h1 class="title">公告与活动</h1>
+				<p class="content">{{seller.bulletin}}</p>
+				<ul class="list">
+					<li class="list-item" v-for="(item, index) in seller.supports"><span :class="classMap[seller.supports[index].type]" class="icon"></span><span class="text">{{item.description}}</span></li>
+				</ul>
 			</div>
-			<div class="content">
-				<span class="delivery">
-					<h2 class="title">起送价</h2>
-					<span class="text">20<span class="unit">元</span></span>
-				</span>
-				<span class="price">
-					<h2 class="title">商家配送</h2>
-					<span class="text">4<span class="unit">元</span></span>
-				</span>
-				<span class="time">
-					<h2 class="title">平均配送</h2>
-					<span class="text">39<span class="unit">分钟</span></span>
-				</span>
+			<split></split>
+			<div class="seller-pic">
+				<h1 class="title">商家实景</h1>
+				<div class="pic">
+					<ul class="picList">
+						<li class="item" v-for="item in seller.pics"><img :src="item.pics" width="120" height="94"></li>
+					</ul>
+				</div>
 			</div>
 		</div>
-		<split></split>
 	</div>
 </template>
 <script>
 import star from "@/components/star/star"
 import split from "@/components/split/split"
+import BScroll from 'better-scroll'
 export default{
+	data() {
+		return{
+
+		}
+	},
 	props: {
 		seller: {
 			type: Object
@@ -41,7 +65,34 @@ export default{
 	components: {
 		star,
 		split
-	}
+	},
+	created() {
+		this.classMap = ['decrease', 'discount', 'special', 'invoice', 'guarantee'];
+	},
+	mounted() {
+		this.$nextTick(() => {
+			this._initScroll()
+		})
+	},
+	methods: {
+		_initScroll() {
+			if (!this.scroll) {
+	          this.scroll = new BScroll(this.$refs.seller, {
+	            click: true
+	          })
+	        } else {
+	          this.scroll.refresh();
+	        }
+		}
+	},
+	watch: {
+      'seller' () {
+        this.$nextTick(() => {
+          this._initScroll();
+          // this._initPics();
+        });
+      }
+    }
 }
 </script>
 <style lang="stylus" type="stylesheet/stylus">
@@ -92,7 +143,7 @@ export default{
 					margin-top 4px	
 			.content
 				display flex
-				padding 18px
+				padding 18px 0
 				font-size 0 
 				.delivery,.price
 					border-right 1px solid rgba(7 , 17 , 27, 0.1)	
@@ -113,5 +164,62 @@ export default{
 							font-size 10px
 							color rgb(147, 153, 159)
 							line-height 10px	
-										
+		.activity
+			padding 18px 18px 16px
+			.title
+				font-size 14px
+				color rgb(7, 17, 27)
+				line-height 14px
+				margin-bottom 8px
+			.content 
+				font-size 12px
+				font-weight 200
+				line-height 24px
+				color rgb(240, 20, 20)
+				padding 0 12px 16px
+			.list		
+				.list-item
+					border-top solid 1px rgba(7, 17, 27, 0.1)
+					padding 16px 12px
+					.icon
+						display inline-block
+						width 16px
+						height 16px
+						vertical-align: top
+						margin-right: 6px
+						background-size: 16px 16px
+						background-repeat: no-repeat 
+						&.decrease
+							bg-image('decrease_4')
+						&.discount
+							bg-image('discount_4')
+						&.special
+							bg-image('special_4')
+						&.invoice
+							bg-image('invoice_4')
+						&.guarantee
+							bg-image('guarantee_4')				
+					.text 
+						display inline
+						vertical-align top 
+						font-size 12px
+						font-weight 200
+						color rgb(7, 17 ,27)
+						line-height 16px
+						margin-left 6px						
+		.seller-pic				
+			padding 18px
+			.title 
+				font-size 14px
+				color rgb(7, 17, 27)
+				line-height 14px
+				margin-bottom 12px
+			.pic 
+				.picList
+					.item
+						display inline-block
+						margin-right 6px
+						white-space nowrap
+						&.last-child
+							margin-right 0	
 </style>
